@@ -8,14 +8,17 @@ import { TRPCModule, TRPCPanelController } from "@repo/trpc";
 import { PostHogModule } from "@repo/analytics";
 import { WebsocketsModule } from "@repo/websockets/server";
 import { HealthModule } from "./health/health.module.js";
+import { MatchModule } from "@repo/services";
+import { CqrsModule } from "@nestjs/cqrs";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    CqrsModule.forRoot(),
     TRPCModule,
-    DatabaseModule,
+    DatabaseModule.forRoot(),
     RedisModule,
     PostHogModule,
     AppConfigModule,
@@ -23,6 +26,7 @@ import { HealthModule } from "./health/health.module.js";
     WebsocketsModule,
     WebhooksModule,
     HealthModule,
+    MatchModule
   ],
   controllers: [TRPCPanelController],
   providers: [],

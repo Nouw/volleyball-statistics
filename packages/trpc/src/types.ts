@@ -4,6 +4,7 @@
  */
 import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { Router } from "@trpc/server/unstable-core-do-not-import";
+import type { AuthUser } from "@clerk/nextjs/server";
 
 // Type for routers - eliminates the need for explicit types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,3 +25,9 @@ export type RouterInput<TRouter extends AnyTRPCRouter> =
 // Generic router output type
 export type RouterOutput<TRouter extends AnyTRPCRouter> =
   inferRouterOutputs<TRouter>;
+
+export interface TRPCAuthState {
+  user?: AuthUser | null;
+  userId?: string | null;
+  isAuthenticated: boolean;
+}

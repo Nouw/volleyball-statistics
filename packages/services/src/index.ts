@@ -9,3 +9,10 @@ export * from "./redis/redis.module.js";
 export * from "./webhooks/clerk-webhooks.service.js";
 export * from "./webhooks/clerk-webhooks.controller.js";
 export * from "./webhooks/webhooks.module.js";
+
+// Match
+export * from "./match/match.module.js";
+export * from "./match/commands/record-action.command.js";
+export * from "./match/commands/record-action.handler.js";
+export * from "./match/events/action-recorded-projection.handler.js";
+export * from "./match/events/action-recorded.event.js";
