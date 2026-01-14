@@ -5,6 +5,8 @@ import { Repository } from "typeorm";
 import { z } from "zod";
 import { protectedProcedure, t } from "../base/index.js";
 import { Team, Player } from "@repo/db";
+import { CommandBus } from "@nestjs/cqrs";
+import { AddPlayerCommand } from "@repo/services";
 
 const createTeamInput = z.object({
   name: z.string().min(1),
@@ -13,6 +15,7 @@ const createTeamInput = z.object({
 
 const getTeamInput = z.object({ id: z.string().uuid() });
 const listPlayersInput = z.object({ teamId: z.string().uuid() });
+const addPlayerInput = z.object({ teamId: z.string().uuid(), name: z.string().min(1), number: z.number().int() });
 
 @Injectable()
 export class TeamRouter {
@@ -21,6 +24,7 @@ export class TeamRouter {
     private readonly teamRepo: Repository<Team>,
     @InjectRepository(Player)
     private readonly playerRepo: Repository<Player>,
+    private readonly commandBus: CommandBus,
   ) {}
 
   public readonly router = t.router({
@@ -108,5 +112,22 @@ export class TeamRouter {
           teamId: p.teamId,
         }));
       }),
+
+    addPlayer: protectedProcedure
+      .input(addPlayerInput)
+      .mutation(async ({ input, ctx }) => {
+        const userId = ctx.auth.userId;
+        if (!userId) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+        const team = await this.teamRepo.findOne({ where: { id: input.teamId, ownerClerkId: userId } });
+        if (!team) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Team not found or not owned by user" });
+        }
+
+        await this.commandBus.execute(new AddPlayerCommand(input.teamId, input.name, input.number));
+
+        return { success: true } as const;
+      })
   });
 }

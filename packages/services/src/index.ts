@@ -40,3 +40,7 @@ export * from "./match/queries/list-matches-by-team.query.js";
 export * from "./match/queries/list-matches-by-team.handler.js";
 export * from "./match/queries/get-match-totals-by-player.query.js";
 export * from "./match/queries/get-match-totals-by-player.handler.js";
+
+// Team
+export * from "./team/commands/impl/add-player.command.js";
+export * from "./team/team.module.js";

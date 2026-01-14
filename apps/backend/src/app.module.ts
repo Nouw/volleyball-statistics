@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { DatabaseModule } from "@repo/db";
-import { AuthModule, RedisModule, WebhooksModule } from "@repo/services";
+import { AuthModule, RedisModule, TeamModule, WebhooksModule } from "@repo/services";
 import { AppConfigModule } from "./config/app-config.module.js";
 
 import { TRPCModule, TRPCPanelController } from "@repo/trpc";
@@ -26,7 +26,8 @@ import { CqrsModule } from "@nestjs/cqrs";
     WebsocketsModule,
     WebhooksModule,
     HealthModule,
-    MatchModule
+    MatchModule,
+    TeamModule,
   ],
   controllers: [TRPCPanelController],
   providers: [],
