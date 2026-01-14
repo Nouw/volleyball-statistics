@@ -250,17 +250,18 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
           <Alert variant="destructive">Rotation not available for this set.</Alert>
         ) : (
           <div className="flex flex-col">
-            <div className="flex flex-row gap-4">
-              <div className="flex flex-row gap-2">
-                <div className="flex flex-col items-center bg-primary text-white rounded-md px-4 py-2">
+            <div className="flex flex-row gap-4 items-center">
+              <div className="flex flex-row gap-2 items-center">
+                <div className="flex flex-col items-center bg-primary text-white rounded-md px-4 py-2 h-18">
                   <p>US</p>
                   <p className="text-2xl">{usScore}</p>
                 </div>
-                <div className="flex flex-col items-center bg-red-500 text-white rounded-md px-4 py-2">
+                <div className="flex flex-col items-center bg-red-500 text-white rounded-md px-4 py-2 h-18">
                   <p>OP</p>
                   <p className="text-2xl">{oppScore}</p>
                 </div>
               </div>
+              <MatchButton text="Opponent" color="accent" className="w-20 h-20"/>
               <div className="flex flex-row gap-4 ml-auto border p-2">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="player">Player</Label>
