@@ -11,6 +11,7 @@ import { RotationField } from "../../../../../components/matches/rotation-field"
 import { OnCourtPlayersCard } from "../../../../../components/matches/on-court-players-card";
 import { MatchTotalsByPlayer } from "@/components/matches/match-totals-by-player";
 import type { RouterOutputs } from "@repo/trpc";
+import { useTRPCClient } from "../../../../../utils/trpc";
 
 
 const VALID_TABS = ["total", "set1", "set2", "set3", "set4", "set5"] as const;
@@ -20,19 +21,22 @@ export default function MatchDetailPage(): JSX.Element {
   const { matchId, teamId } = useParams<{ matchId: string; teamId: string }>();
   const searchParams = useSearchParams();
   const trpc = useTRPC();
+  const trpcClient = useTRPCClient();
 
   const activeTab: TabKey = useMemo(() => {
     const fromUrl = searchParams.get("tab")?.toLowerCase();
     return VALID_TABS.includes(fromUrl as TabKey) ? (fromUrl as TabKey) : "total";
   }, [searchParams]);
 
-  const scoreQuery = useQuery<RouterOutputs["match"]["getSets"]>(
-    trpc.match.getSets.queryOptions({ matchId })
+  const scoreQuery = useQuery<RouterOutputs["match"]["getSets"]>({
+      queryKey: trpc.match.getSets.queryOptions({ matchId }).queryKey,
+    queryFn: () => trpcClient.match.getSets.query({ matchId }),
+    }
   );
 
   const sets = scoreQuery.data ?? [];
   const activeSetIndex = activeTab === "total" ? -1 : VALID_TABS.indexOf(activeTab) - 1;
-  const activeSet = activeTab === "total" ? null : sets.find((set: { key: number; }) => set.key === activeSetIndex) || null;
+  const activeSet = activeTab === "total" ? null : sets.find((set: { order: number; }) => set.order === activeSetIndex) || null;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">

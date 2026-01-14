@@ -82,7 +82,11 @@ export function RotationField({ teamId, setId, showDelete }: RotationFieldProps)
   }, [rotationStateQuery.data, teamId]);
 
   useEffect(() => {
-    if (!hasRotation) return;
+    if (!hasRotation) {
+      setPositions(["", "", "", "", "", ""]);
+      setLiberoId("");
+      return;
+    }
     if (rotationState) {
       setPositions([...rotationState.positions]);
       setLiberoId(rotationState.liberoId);
@@ -165,8 +169,8 @@ export function RotationField({ teamId, setId, showDelete }: RotationFieldProps)
     }
     return playersQuery.data.filter((p) => {
       if (used.has(p.id)) return false;
-      if (slotTarget.type === "position" && slotTarget.index === 0 && p.id === liberoId) return false;
-      return true;
+      return !(slotTarget.type === "position" && slotTarget.index === 0 && p.id === liberoId);
+
     });
   }, [playersQuery.data, slotTarget, allUsedIds, positions, liberoId]);
 
