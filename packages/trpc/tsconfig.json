@@ -10,7 +10,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@repo/constants": ["../constants/src/index.ts"],
+      "@repo/constants/*": ["../constants/src/*"]
     }
   },
   "include": ["src/**/*.ts"],

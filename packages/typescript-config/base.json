@@ -14,7 +14,9 @@
       "@repo/services/*": ["../../packages/services/src/*"],
       "@repo/trpc/*": ["../../packages/trpc/src/*"],
       "@repo/eslint-config/*": ["../../packages/eslint-config/src/*"],
-      "@repo/analytics/*": ["../../packages/analytics/src/*"]
+      "@repo/analytics/*": ["../../packages/analytics/src/*"],
+      "@repo/constants": ["../../packages/constants/src/index.ts"],
+      "@repo/constants/*": ["../../packages/constants/src/*"]
     },
     "declaration": true,
     "declarationMap": true,

@@ -17,6 +17,7 @@ import {
   Player,
   MatchAction,
   PlayerMatchStats,
+  SetStartingRotation,
 } from "./entities/index.js";
 
 // Calculate __dirname equivalent for ESM
@@ -86,6 +87,7 @@ export const entities = [
   Player,
   MatchAction,
   PlayerMatchStats,
+  SetStartingRotation,
 ];
 
 export const dataSourceOptions: DataSourceOptions = {

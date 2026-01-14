@@ -37,7 +37,7 @@ export class RecordActionHandler implements ICommandHandler<RecordActionCommand>
     }
 
     const lastAction = await this.actions.findOne({
-      where: { setId: command.setId },
+      where: { set: { id: command.setId } },
       order: { sequence: "DESC" },
     });
 

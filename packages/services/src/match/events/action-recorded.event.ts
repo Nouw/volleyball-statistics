@@ -1,3 +1,5 @@
+import { MatchAction } from "@repo/constants";
+
 export class ActionRecordedEvent {
   constructor(
     public readonly actionId: string,
@@ -5,7 +7,7 @@ export class ActionRecordedEvent {
     public readonly setId: string,
     public readonly teamId: string,
     public readonly playerId: string,
-    public readonly actionType: string,
+    public readonly actionType: MatchAction,
     public readonly outcome: string,
     public readonly pointDelta: number,
     public readonly sequence: number,

@@ -4,6 +4,7 @@
   "globalEnv": [],
   "globalPassThroughEnv": ["NODE_ENV"],
   "ui": "tui",
+  "concurrency": "11",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

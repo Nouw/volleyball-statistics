@@ -28,6 +28,12 @@ export function Navbar(): JSX.Element {
             </Link>
           </Button>
 
+          <Button variant="link" asChild>
+            <Link href="/teams" className="hover:underline">
+              Teams
+            </Link>
+          </Button>
+
           {isSignedIn ? (
             <>
               <Button variant="link" asChild>

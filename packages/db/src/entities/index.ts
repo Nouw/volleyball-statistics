@@ -8,3 +8,4 @@ export * from "./match/team.entity.js";
 export * from "./match/player.entity.js";
 export * from "./match/match-action.entity.js";
 export * from "./match/player-match-stats.entity.js";
+export * from "./match/set-starting-rotation.entity.js";

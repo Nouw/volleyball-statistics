@@ -7,7 +7,9 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@repo/constants": ["../constants/src/index.ts"],
+      "@repo/constants/*": ["../constants/src/*"]
     },
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true

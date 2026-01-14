@@ -28,6 +28,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.1.0",
     "@repo/analytics": "workspace:*",
+    "@repo/constants": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/services": "workspace:*",
     "@repo/trpc": "workspace:*",

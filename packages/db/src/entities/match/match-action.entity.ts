@@ -13,6 +13,7 @@ import type { Match } from "./match.entity.js";
 import type { Set } from "./set.entity.js";
 import type { Team } from "./team.entity.js";
 import type { Player } from "./player.entity.js";
+import { MatchAction as MatchActionEnum } from "@repo/constants";
 
 @Entity("match_actions")
 @Index("idx_match_actions_set_sequence", ["set", "sequence"], { unique: true })
@@ -48,8 +49,8 @@ export class MatchAction {
   @RelationId((action: MatchAction) => action.player)
   playerId: string;
 
-  @Column({ type: "varchar", length: 40 })
-  actionType: string;
+  @Column({ type: "enum", enum: MatchActionEnum })
+  actionType: MatchActionEnum;
 
   @Column({ type: "varchar", length: 40 })
   outcome: string;

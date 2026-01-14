@@ -26,6 +26,7 @@
     "@nestjs/common": "^11.1.0",
     "@nestjs/config": "^4.0.2",
     "@nestjs/typeorm": "^11.0.0",
+    "@repo/constants": "workspace:*",
     "dotenv": "^16.5.0",
     "pg": "^8.15.5",
     "reflect-metadata": "^0.2.2",

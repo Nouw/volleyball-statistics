@@ -12,6 +12,9 @@ export class Set {
   match: Match;
 
   @Column()
+  key: number;
+
+  @Column()
   pointsA: number;
 
   @Column()
