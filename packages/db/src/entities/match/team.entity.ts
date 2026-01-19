@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import type { Match } from "./match.entity.js";
+import { Player } from "./player.entity.js";
 
 @Entity("teams")
 @Index(["ownerClerkId", "name"], { unique: false })
@@ -29,6 +30,9 @@ export class Team {
 
   @OneToMany("Match", "teamB")
   awayMatches: Match[];
+
+  @OneToMany("Player", "team")
+  players: Player[];
 
   @CreateDateColumn()
   createdAt: Date;

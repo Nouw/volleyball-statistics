@@ -8,6 +8,12 @@ export enum MatchAction {
   InRallyHitStillInPlay = "inRally.hitStillInPlay",
   InRallyBlockStillInPlay = "inRally.blockStillInPlay",
 
+  // Receive
+  OneReceive = "receive.one",
+  TwoReceive = "receive.two",
+  ThreeReceive = "receive.three",
+  OverpassReceive = "receive.overpass",
+
   // earned
   EarnedAce = "earned.ace",
   EarnedSpike = "earned.spike",
@@ -49,3 +55,8 @@ export function formatMatchActionLabel(value: MatchAction): string {
     .replace(/\./g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
+
+export const attackScore = [MatchAction.EarnedSpike, MatchAction.EarnedTip, MatchAction.EarnedDownBallHit, MatchAction.EarnedDump];
+export const attackError = [MatchAction.ErrorSpike, MatchAction.ErrorTip, MatchAction.ErrorDownBallHit, MatchAction.ErrorDump, MatchAction.FaultBallHandling, MatchAction.FaultFootFault, MatchAction.FaultBackRowAttack];
+export const restError = [MatchAction.FaultNet, MatchAction.FaultUnder, MatchAction.FaultOverTheNet, MatchAction.FaultOutOfRotation]
+export const receiveError = []

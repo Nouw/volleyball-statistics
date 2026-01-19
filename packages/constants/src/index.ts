@@ -1,1 +1,1 @@
-export { MatchAction, formatMatchActionLabel } from "./match/match-action.js";
+export { MatchAction, formatMatchActionLabel, attackScore, attackError, restError } from "./match/match-action.js";

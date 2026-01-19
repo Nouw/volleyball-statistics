@@ -14,6 +14,8 @@ import { GetActionsHandler } from "./queries/get-actions.handler.js";
 import { GetPlayerStatsHandler } from "./queries/get-player-stats.handler.js";
 import { ListMatchesByTeamHandler } from "./queries/list-matches-by-team.handler.js";
 import { GetMatchTotalsByPlayerHandler } from "./queries/get-match-totals-by-player.handler.js";
+import { GetMatchStatsHandler } from "./queries/get-match-stats.handler.js";
+import { GetSetStatsHandler } from "./queries/get-set-stats.handler.js";
 
 const commandHandlers = [RecordActionHandler, DeleteActionHandler, SetStartingRotationHandler, DeleteStartingRotationHandler];
 const eventHandlers = [ActionRecordedProjectionHandler, ActionDeletedProjectionHandler];
@@ -25,6 +27,8 @@ const queryHandlers = [
   GetPlayerStatsHandler,
   ListMatchesByTeamHandler,
   GetMatchTotalsByPlayerHandler,
+  GetMatchStatsHandler,
+  GetSetStatsHandler,
 ];
 
 @Module({

@@ -9,9 +9,9 @@ import { Skeleton } from "@repo/ui/components/base/skeleton";
 import { MatchTabs } from "@/components/matches/match-tabs";
 import { RotationField } from "../../../../../components/matches/rotation-field";
 import { OnCourtPlayersCard } from "../../../../../components/matches/on-court-players-card";
-import { MatchTotalsByPlayer } from "@/components/matches/match-totals-by-player";
 import type { RouterOutputs } from "@repo/trpc";
 import { useTRPCClient } from "../../../../../utils/trpc";
+import { StatsCard } from "../../../../../components/matches/stats/stats-card";
 
 
 const VALID_TABS = ["total", "set1", "set2", "set3", "set4", "set5"] as const;
@@ -34,9 +34,10 @@ export default function MatchDetailPage(): JSX.Element {
     }
   );
 
-  const sets = scoreQuery.data ?? [];
+  const sets: { id: string, pointsA: number, pointsB: number, matchId: string, order: number }[]  = scoreQuery.data ?? [];
   const activeSetIndex = activeTab === "total" ? -1 : VALID_TABS.indexOf(activeTab) - 1;
   const activeSet = activeTab === "total" ? null : sets.find((set: { order: number; }) => set.order === activeSetIndex) || null;
+  const setIds = sets.sort((a, b) => a.order - b.order).map((set) => set.id);
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
@@ -56,7 +57,7 @@ export default function MatchDetailPage(): JSX.Element {
       )}
 
       {activeTab === "total" ? (
-        <MatchTotalsByPlayer teamId={teamId} matchId={matchId} />
+        <StatsCard teamId={teamId} matchId={matchId} setIds={setIds} />
       ) : activeSet ? (
         <div className="space-y-4">
           <RotationField teamId={teamId} setId={activeSet.id} showDelete={activeSet.pointsA === 0 && activeSet.pointsB === 0} />

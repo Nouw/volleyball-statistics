@@ -23,6 +23,8 @@ import {
   SetStartingRotationCommand,
   DeleteActionCommand,
   DeleteStartingRotationCommand,
+  GetMatchStatsQuery,
+  GetSetStatsQuery,
 } from "@repo/services";
 
 
@@ -54,6 +56,8 @@ const deleteStartingRotationInput = z.object({ setId: z.string().uuid(), teamId:
 const getRotationStateInput = z.object({ setId: z.string().uuid() });
 const deleteActionInput = z.object({ id: z.string().uuid() });
 const getMatchTotalsByPlayerInput = z.object({ matchId: z.string().uuid() });
+const getMatchStatsInput = z.object({ matchId: z.string().uuid(), teamId: z.string().uuid() });
+const getSetStatsInput = z.object({ matchId: z.string().uuid(), teamId: z.string().uuid(), setId: z.string().uuid()});
 
 @Injectable()
 export class MatchRouter {
@@ -232,5 +236,13 @@ export class MatchRouter {
       .query(async ({ input }) => {
         return this.queryBus.execute(new GetPlayerStatsQuery(input.matchId, input.playerId));
       }),
+
+    getMatchStats: protectedProcedure.input(getMatchStatsInput).query(async ({input}) => {
+      return this.queryBus.execute(new GetMatchStatsQuery(input.matchId, input.teamId))
+    }),
+
+    getSetStats: protectedProcedure.input(getSetStatsInput).query(async ({input}) => {
+      return this.queryBus.execute(new GetSetStatsQuery(input.matchId, input.teamId, input.setId))
+    })
   });
 }

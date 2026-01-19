@@ -60,6 +60,24 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
     queryFn: () => trpcClient.match.listByTeam.query({ teamId }),
   });
 
+  const opponentId = useMemo(() => {
+    const match = matchListQuery?.data?.find((m: { id: string; }) => m.id === matchId);
+    if (!match) return null;
+    if (match.teamAId === teamId) return match.teamBId;
+
+    return match.teamAId;
+  }, [matchId, matchListQuery.data, teamId])
+
+  const opponentPlayers = useQuery<PlayerSummary[]>({
+    queryKey: opponentId
+      ? trpc.team.players.queryOptions({ teamId: opponentId }).queryKey
+      : ["team.players", "disabled"],
+
+    queryFn: () => trpcClient.team.players.query({ teamId: opponentId! }),
+
+    enabled: !!opponentId,
+  });
+
   const deleteAction = useMutation({
     ...trpc.match.deleteAction.mutationOptions(),
     onSuccess: () => {
@@ -84,8 +102,9 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
   const playerLabelMap = useMemo(() => {
     const map = new Map<string, string>();
     (playersQuery.data ?? []).forEach((p) => map.set(p.id, `#${p.number ?? "?"} ${p.name}`));
+    (opponentPlayers.data ?? []).forEach((p) => map.set(p.id, `#${p.number ?? "?"} ${p.name}`));
     return map;
-  }, [playersQuery.data]);
+  }, [playersQuery.data, opponentPlayers.data]);
 
   const serverPlayerId = rotationState?.positions?.[0] ?? null;
 
@@ -202,6 +221,8 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
     }));
   }, []);
 
+  const [actionTeamId, setActionTeamId] = useState<string | null>(null);
+
   const recordActionMutation = useMutation({
     mutationFn: async () => {
       if (!selectedAction || !selectedPlayerId) throw new Error("Select player and action");
@@ -210,7 +231,7 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
       return trpcClient.match.recordAction.mutate({
         matchId,
         setId,
-        teamId,
+        teamId: actionTeamId!,
         playerId: selectedPlayerId,
         actionType: selectedAction,
         outcome: computedOutcome,
@@ -293,7 +314,19 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
                     text={`${playerLabelMap.get(p.id) ?? p.id}${p.isLibero ? " (Libero)" : ""}`}
                     selected={p.id === selectedPlayerId}
                     badge={p.id === serverPlayerId ? "Serving" : undefined}
-                    onClick={() => setSelectedPlayerId(p.id)}
+                    onClick={() => { setSelectedPlayerId(p.id); setActionTeamId(teamId) }}
+                  />
+                ))}
+              </div>
+              <div className="flex flex-col gap-2">
+                {opponentPlayers.data?.map((p) => (
+                  <MatchButton
+                    key={p.id}
+                    text={playerLabelMap.get(p.id) ?? p.id}
+                    selected={p.id === selectedPlayerId}
+                    badge={p.id === serverPlayerId ? "Serving" : undefined}
+                    onClick={() => { setSelectedPlayerId(p.id); setActionTeamId(opponentId) }}
+                    color="accent"
                   />
                 ))}
               </div>
@@ -361,10 +394,7 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
                 removeAction={(id) => deleteAction.mutate({ id })}
               />
             }
-
-
           </div>
-
         )}
       </CardContent>
     </Card>
