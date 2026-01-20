@@ -60,7 +60,12 @@ export default function MatchDetailPage(): JSX.Element {
         <StatsCard teamId={teamId} matchId={matchId} setIds={setIds} />
       ) : activeSet ? (
         <div className="space-y-4">
-          <RotationField teamId={teamId} setId={activeSet.id} showDelete={activeSet.pointsA === 0 && activeSet.pointsB === 0} />
+          <RotationField
+            teamId={teamId}
+            matchId={matchId}
+            setId={activeSet.id}
+            showDelete={activeSet.pointsA === 0 && activeSet.pointsB === 0}
+          />
           <OnCourtPlayersCard teamId={teamId} setId={activeSet.id} matchId={matchId} />
         </div>
       ) : (

@@ -227,10 +227,6 @@ Contributions are what make the open-source community such an amazing place to l
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## 📧 Contact
-
-Blaž Aristovnik - [@barisgit](https://github.com/barisgit) - [aristovnik.me](https://aristovnik.me)
-
 ## 🙏 Acknowledgments
 
 - [Turborepo](https://turbo.build/)
