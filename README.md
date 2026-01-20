@@ -54,8 +54,8 @@ A modern full-stack, type-safe monorepo template with real-time capabilities and
 
 ```bash
 # Clone the repository
-git clone https://github.com/barisgit/nextjs-nestjs-expo-template.git
-cd nextjs-nestjs-expo-template
+git clone git@github.com:Nouw/volleyball-statistics.git
+cd volleyball-statistics 
 
 # Install dependencies
 pnpm i # or pnpm install
