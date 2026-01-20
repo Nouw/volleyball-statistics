@@ -72,9 +72,7 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
     queryKey: opponentId
       ? trpc.team.players.queryOptions({ teamId: opponentId }).queryKey
       : ["team.players", "disabled"],
-
     queryFn: () => trpcClient.team.players.query({ teamId: opponentId! }),
-
     enabled: !!opponentId,
   });
 
@@ -96,8 +94,48 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
     return null;
   }, [rotationStateQuery.data, teamId]);
 
+  const opponentRotationState: OnCourtData | null = useMemo(() => {
+    const data = rotationStateQuery.data;
+    if (!data || !opponentId) return null;
+    if (data.teamA?.teamId === opponentId) return data.teamA;
+    if (data.teamB?.teamId === opponentId) return data.teamB;
+    return null;
+  }, [rotationStateQuery.data, opponentId]);
+
+  const servingTeamId = useMemo(() => {
+    const data = rotationStateQuery.data;
+    if (!data) return null;
+    return data.currentServerTeamId ?? data.initialServerTeamId ?? null;
+  }, [rotationStateQuery.data]);
+
+  const serverPlayerId = useMemo(() => {
+    if (!servingTeamId) return null;
+    if (servingTeamId === teamId) return rotationState?.positions?.[0] ?? null;
+    if (servingTeamId === opponentId) return opponentRotationState?.positions?.[0] ?? null;
+    return null;
+  }, [servingTeamId, rotationState, opponentRotationState, teamId, opponentId]);
+
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
   const [selectedAction, setSelectedAction] = useState<MatchAction | null>(null);
+  const [actionTeamId, setActionTeamId] = useState<string | null>(null);
+
+  const selectedPlayerTeamId = useMemo(() => {
+    if (!selectedPlayerId) return null;
+    if (rotationState) {
+      const inUs = rotationState.positions.includes(selectedPlayerId) || rotationState.liberoId === selectedPlayerId;
+      if (inUs) return teamId;
+    }
+    if (opponentId && opponentRotationState) {
+      const inOpp = opponentRotationState.positions.includes(selectedPlayerId) || opponentRotationState.liberoId === selectedPlayerId;
+      if (inOpp) return opponentId;
+    }
+    return null;
+  }, [selectedPlayerId, rotationState, opponentRotationState, teamId, opponentId]);
+
+  const isSelectedPlayerServingTeam = useMemo(() => {
+    if (!servingTeamId || !selectedPlayerTeamId) return false;
+    return servingTeamId === selectedPlayerTeamId;
+  }, [servingTeamId, selectedPlayerTeamId]);
 
   const playerLabelMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -106,16 +144,16 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
     return map;
   }, [playersQuery.data, opponentPlayers.data]);
 
-  const serverPlayerId = rotationState?.positions?.[0] ?? null;
-
   const onCourt = useMemo(() => {
-    if (!rotationState) return [] as Array<{ id: string; isLibero: boolean; label: string }>;
-    const list = rotationState.positions.map((id: string, idx: number) => ({ id, isLibero: false, label: `Pos ${idx + 1}` }));
+    if (!rotationState) return [] as Array<{ id: string; isLibero: boolean; number: number }>;
+    const list = rotationState.positions.map((id: string) => ({ id, isLibero: false, number: playersQuery.data?.find((player) => player.id === id)?.number  }));
     if (rotationState.liberoId) {
-      list.push({ id: rotationState.liberoId, isLibero: true, label: "Libero" });
+      list.push({ id: rotationState.liberoId, isLibero: true, number: playersQuery.data?.find((player) => player.id === rotationState.liberoId)?.number });
     }
+
+    list.sort((a, b) => (a.number ?? 999) - (b.number ?? 999));
     return list;
-  }, [rotationState]);
+  }, [playersQuery.data, rotationState]);
 
   const matchInfo = useMemo(() => matchListQuery.data?.find((m: { id: string; }) => m.id === matchId) ?? null, [matchListQuery.data, matchId]);
   const activeSetScore = useMemo(() => scoreQuery.data?.find((s: { id: string; }) => s.id === setId) ?? null, [scoreQuery.data, setId]);
@@ -142,12 +180,24 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
   };
 
   useEffect(() => {
-    if (!selectedPlayerId && onCourt.length > 0) {
-      const initial = serverPlayerId ?? onCourt[0]?.id;
-      setSelectedPlayerId(initial ?? "");
+    if (!selectedPlayerId) {
+      if (serverPlayerId) {
+        setSelectedPlayerId(serverPlayerId);
+        setActionTeamId(servingTeamId);
+        return;
+      }
+      if (onCourt.length > 0) {
+        const fallback = onCourt[0]?.id;
+        setSelectedPlayerId(fallback ?? "");
+        setActionTeamId(teamId);
+      }
     }
-  }, [onCourt, serverPlayerId, selectedPlayerId]);
+  }, [selectedPlayerId, serverPlayerId, servingTeamId, onCourt, teamId]);
 
+  const actionHistory = useMemo(() => {
+    const list = actionsQuery.data ?? [];
+    return [...list].filter((x) => x.setId === setId).sort((a, b) => b.sequence - a.sequence).slice(0, 6);
+  }, [actionsQuery.data, setId]);
 
   const isLoading = playersQuery.isLoading || rotationStateQuery.isLoading || scoreQuery.isLoading || matchListQuery.isLoading;
   const errorMessage = playersQuery.error
@@ -155,6 +205,8 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
     : rotationStateQuery.error
       ? "Rotation state unavailable"
       : null;
+
+  const isSelectedPlayerServing = isSelectedPlayerServingTeam;
 
   const earnedActions = useMemo(
     () => [
@@ -215,13 +267,36 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
       MatchAction.InRallyBlockStillInPlay,
     ];
 
+    console.log(actionHistory);
+
+    if (!isSelectedPlayerServingTeam) {
+      actions[0] = MatchAction.OverpassReceive
+      actions[1] = MatchAction.OneReceive
+      actions[2] = MatchAction.TwoReceive
+      actions[3] = MatchAction.ThreeReceive
+    }
+
+    if (actionHistory !== undefined) {
+      if (actionHistory[0]?.outcome === "In play") {
+        if ([MatchAction.InRallyOneServe, MatchAction.InRallyTwoServe, MatchAction.InRallyThreeServe].includes(actionHistory[0]?.actionType) && !isSelectedPlayerServing) {
+          actions[0] = MatchAction.OverpassReceive
+          actions[1] = MatchAction.OneReceive
+          actions[2] = MatchAction.TwoReceive
+          actions[3] = MatchAction.ThreeReceive
+        } else {
+          actions[0] = MatchAction.OverpassReceive
+          actions[1] = MatchAction.InRallyOneFreeBallReceive
+          actions[2] = MatchAction.InRallyTwoFreeBallReceive
+          actions[3] = MatchAction.InRallyThreeFreeBallReceive
+        }
+      }
+    }
+
     return actions.map((val) => ({
       value: val,
       label: formatMatchActionLabel(val),
     }));
-  }, []);
-
-  const [actionTeamId, setActionTeamId] = useState<string | null>(null);
+  }, [actionHistory, isSelectedPlayerServingTeam]);
 
   const recordActionMutation = useMutation({
     mutationFn: async () => {
@@ -250,12 +325,8 @@ export function OnCourtPlayersCard({ teamId, setId, matchId }: OnCourtPlayersCar
     },
   });
 
-  const canSave = Boolean(selectedAction && selectedPlayerId);
+  const canSave = Boolean(selectedAction && selectedPlayerId && actionTeamId);
 
-  const actionHistory = useMemo(() => {
-    const list = actionsQuery.data ?? [];
-    return [...list].filter((x) => x.setId === setId).sort((a, b) => b.sequence - a.sequence).slice(0, 6);
-  }, [actionsQuery.data, setId]);
 
   return (
     <Card>

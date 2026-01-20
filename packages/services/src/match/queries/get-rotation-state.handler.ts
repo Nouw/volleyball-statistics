@@ -20,7 +20,7 @@ export class GetRotationStateHandler implements IQueryHandler<GetRotationStateQu
     @InjectRepository(MatchAction) private readonly actionRepo: Repository<MatchAction>,
   ) {}
 
-  async execute(query: GetRotationStateQuery): Promise<{ teamA: RotationState; teamB: RotationState }> {
+  async execute(query: GetRotationStateQuery): Promise<{ teamA: RotationState; teamB: RotationState; initialServerTeamId: string; currentServerTeamId: string }> {
     const set = await this.setRepo.findOne({ where: { id: query.setId }, relations: ["match"] });
     if (!set) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Set not found" });
@@ -79,38 +79,45 @@ export class GetRotationStateHandler implements IQueryHandler<GetRotationStateQu
 
     const actions = await this.actionRepo.find({ where: { set: { id: set.id } }, order: { sequence: "ASC" } });
 
-    let servingTeam: "A" | "B" = "A"; // assume team A starts serving (position1). Adjust if you add explicit starter.
+    const initialServerTeamId = set.initialServingTeamId ?? set.match.teamAId;
+    let servingTeamId = initialServerTeamId;
 
     const rotate = (state: RotationState) => {
-      const last = state.positions[state.positions.length - 1];
-      for (let i = state.positions.length - 1; i > 0; i -= 1) {
-        state.positions[i] = state.positions[i - 1];
+      const first = state.positions[0];
+      for (let i = 0; i < state.positions.length - 1; i += 1) {
+        state.positions[i] = state.positions[i + 1];
       }
-      state.positions[0] = last;
+      state.positions[state.positions.length - 1] = first;
     };
 
     for (const action of actions) {
-      const isActingA = action.teamId === set.match.teamAId;
-      const scoringTeam = action.pointDelta > 0 ? action.teamId : action.teamId === set.match.teamAId ? set.match.teamBId : set.match.teamAId;
-      const scoringIsA = scoringTeam === set.match.teamAId;
+      if (action.pointDelta === 0) continue;
 
-      // Determine receiving team before the rally
-      const receivingIsA = servingTeam === "B";
+      const scoringTeamId = action.pointDelta > 0
+        ? action.teamId
+        : action.teamId === set.match.teamAId
+          ? set.match.teamBId
+          : set.match.teamAId;
 
-      if (action.pointDelta !== 0) {
-        // If receiving team won, they rotate and become serving team
-        if (scoringIsA === receivingIsA) {
-          if (scoringIsA) {
-            rotate(baseStateA);
-            servingTeam = "A";
-          } else {
-            rotate(baseStateB);
-            servingTeam = "B";
-          }
+      const receivingTeamId = servingTeamId === set.match.teamAId ? set.match.teamBId : set.match.teamAId;
+
+      // Side-out: receiving team scores, they rotate and take serve
+      if (scoringTeamId === receivingTeamId) {
+        if (scoringTeamId === set.match.teamAId) {
+          rotate(baseStateA);
+        } else {
+          rotate(baseStateB);
         }
+        servingTeamId = scoringTeamId;
       }
+      // If serving team scores, no rotation; server stays
     }
 
-    return { teamA: baseStateA, teamB: baseStateB };
+    return {
+      teamA: baseStateA,
+      teamB: baseStateB,
+      initialServerTeamId,
+      currentServerTeamId: servingTeamId,
+    };
   }
 }

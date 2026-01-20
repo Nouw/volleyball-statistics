@@ -24,6 +24,8 @@ export * from "./match/commands/set-starting-rotation.command.js";
 export * from "./match/commands/set-starting-rotation.handler.js";
 export * from "./match/commands/delete-starting-rotation.command.js";
 export * from "./match/commands/delete-starting-rotation.handler.js";
+export * from "./match/commands/set-initial-server.command.js";
+export * from "./match/commands/set-initial-server.handler.js";
 export * from "./match/events/starting-rotation-set.event.js";
 export * from "./match/events/starting-rotation-deleted.event.js";
 export * from "./match/queries/get-rotation-state.handler.js";
@@ -44,6 +46,8 @@ export * from "./match/queries/get-match-stats.query.js"
 export * from "./match/queries/get-match-stats.handler.js"
 export * from "./match/queries/get-set-stats.query.js";
 export * from "./match/queries/get-set-stats.handler.js";
+export * from "./match/queries/get-match.query.js";
+export * from "./match/queries/get-match.handler.js";
 
 // Team
 export * from "./team/commands/impl/add-player.command.js";

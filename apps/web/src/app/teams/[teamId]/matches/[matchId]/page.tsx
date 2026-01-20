@@ -7,7 +7,6 @@ import { useTRPC } from "@/utils/trpc";
 import { Alert } from "@repo/ui/components/base/alert";
 import { Skeleton } from "@repo/ui/components/base/skeleton";
 import { MatchTabs } from "@/components/matches/match-tabs";
-import { RotationField } from "../../../../../components/matches/rotation-field";
 import { OnCourtPlayersCard } from "../../../../../components/matches/on-court-players-card";
 import type { RouterOutputs } from "@repo/trpc";
 import { useTRPCClient } from "../../../../../utils/trpc";
@@ -35,6 +34,11 @@ export default function MatchDetailPage(): JSX.Element {
     }
   );
 
+  const matchQuery = useQuery<RouterOutputs["match"]["getMatch"]>({
+    queryKey: trpc.match.getMatch.queryOptions({ matchId }).queryKey,
+    queryFn: () => trpcClient.match.getMatch.query({ matchId }),
+  });
+
   const sets: { id: string, pointsA: number, pointsB: number, matchId: string, order: number }[]  = scoreQuery.data ?? [];
   const activeSetIndex = activeTab === "total" ? -1 : VALID_TABS.indexOf(activeTab) - 1;
   const activeSet = activeTab === "total" ? null : sets.find((set: { order: number; }) => set.order === activeSetIndex) || null;
@@ -61,13 +65,23 @@ export default function MatchDetailPage(): JSX.Element {
         <StatsCard teamId={teamId} matchId={matchId} setIds={setIds} />
       ) : activeSet ? (
         <div className="space-y-4">
-          <PlayersCourt teamAId="" teamBId=""/>
-          <RotationField
-            teamId={teamId}
-            matchId={matchId}
-            setId={activeSet.id}
-            showDelete={activeSet.pointsA === 0 && activeSet.pointsB === 0}
-          />
+          {matchQuery.isLoading ? (
+            <Skeleton className="h-10 w-full" />
+          ) : matchQuery.error ? (
+            <Alert variant="destructive">Failed to load match: {matchQuery.error.message}</Alert>
+          ) : (
+            <div className="flex justify-center min-w-1">
+              <PlayersCourt
+                teamA={matchQuery.data.teamA}
+                teamB={matchQuery.data.teamB}
+                matchId={matchId}
+                setId={activeSet.id}
+                showDelete={activeSet.pointsA === 0 && activeSet.pointsB === 0}
+              />
+            </div>
+
+          )}
+
           <OnCourtPlayersCard teamId={teamId} setId={activeSet.id} matchId={matchId} />
         </div>
       ) : (

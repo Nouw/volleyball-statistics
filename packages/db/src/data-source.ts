@@ -103,7 +103,7 @@ export const dataSourceOptions: DataSourceOptions = {
     path.join(__dirname, "entities", "**", "*.entity.{js,ts}"),
   ],
   migrations: [path.join(__dirname, "migrations", "*.{js,ts}")],
-  synchronize: false,
+  synchronize: true,
   logging: process.env.NODE_ENV !== "production",
 };
 

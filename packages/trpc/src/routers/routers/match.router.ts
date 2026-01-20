@@ -18,14 +18,16 @@ import {
   GetActionsQuery,
   GetPlayerStatsQuery,
   ListMatchesByTeamQuery,
-  GetMatchTotalsByPlayerQuery,
-  RecordActionCommand,
-  SetStartingRotationCommand,
-  DeleteActionCommand,
-  DeleteStartingRotationCommand,
-  GetMatchStatsQuery,
-  GetSetStatsQuery,
-} from "@repo/services";
+   GetMatchTotalsByPlayerQuery,
+   RecordActionCommand,
+   SetStartingRotationCommand,
+   DeleteActionCommand,
+   DeleteStartingRotationCommand,
+   GetMatchStatsQuery,
+   GetSetStatsQuery, GetMatchQuery,
+   SetInitialServerCommand,
+ } from "@repo/services";
+
 
 
 const recordActionInput = z.object({
@@ -44,6 +46,7 @@ const getScoreInput = z.object({ matchId: z.string().uuid() });
 const getActionsInput = z.object({ matchId: z.string().uuid(), setId: z.string().uuid() });
 const getPlayerStatsInput = z.object({ matchId: z.string().uuid(), playerId: z.string().uuid() });
 const createMatchInput = z.object({ teamAId: z.string().uuid(), teamBId: z.string().uuid() });
+const getMatch = z.object({ matchId: z.string().uuid() })
 const listByTeamInput = z.object({ teamId: z.string().uuid() });
 const setStartingRotationInput = z.object({
   setId: z.string().uuid(),
@@ -54,6 +57,7 @@ const setStartingRotationInput = z.object({
 const getStartingRotationInput = z.object({ setId: z.string().uuid(), teamId: z.string().uuid() });
 const deleteStartingRotationInput = z.object({ setId: z.string().uuid(), teamId: z.string().uuid() });
 const getRotationStateInput = z.object({ setId: z.string().uuid() });
+const setInitialServerInput = z.object({ setId: z.string().uuid(), teamId: z.string().uuid() });
 const deleteActionInput = z.object({ id: z.string().uuid() });
 const getMatchTotalsByPlayerInput = z.object({ matchId: z.string().uuid() });
 const getMatchStatsInput = z.object({ matchId: z.string().uuid(), teamId: z.string().uuid() });
@@ -129,6 +133,12 @@ export class MatchRouter {
         };
       }),
 
+    getMatch: protectedProcedure
+      .input(getMatch)
+      .query(async ({ input }) => {
+        return await this.queryBus.execute(new GetMatchQuery(input.matchId));
+      }),
+
     recordAction: protectedProcedure
       .input(recordActionInput)
       .mutation(async ({ input }) => {
@@ -181,6 +191,18 @@ export class MatchRouter {
             input.liberoId,
           ),
         );
+        return { success: true } as const;
+      }),
+
+    setInitialServer: protectedProcedure
+      .input(setInitialServerInput)
+      .mutation(async ({ input, ctx }) => {
+        const userId = ctx.auth.userId;
+        if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+        const team = await this.teamRepo.findOne({ where: { id: input.teamId, ownerClerkId: userId } });
+        if (!team) throw new TRPCError({ code: "NOT_FOUND", message: "Team not found or not owned by user" });
+
+        await this.commandBus.execute(new SetInitialServerCommand(input.setId, input.teamId));
         return { success: true } as const;
       }),
 

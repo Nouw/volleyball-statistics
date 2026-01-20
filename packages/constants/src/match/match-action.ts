@@ -9,10 +9,15 @@ export enum MatchAction {
   InRallyBlockStillInPlay = "inRally.blockStillInPlay",
 
   // Receive
-  OneReceive = "receive.one",
-  TwoReceive = "receive.two",
-  ThreeReceive = "receive.three",
-  OverpassReceive = "receive.overpass",
+  OneReceive = "inRally.oneReceive",
+  TwoReceive = "inRally.twoReceive",
+  ThreeReceive = "inRally.threeReceive",
+  OverpassReceive = "inRally.overpassReceive",
+
+  // Free balls
+  InRallyOneFreeBallReceive = "inRally.oneFreeBallReceive",
+  InRallyTwoFreeBallReceive = "inRally.twoFreeBallReceive",
+  InRallyThreeFreeBallReceive = "inRally.threeFreeBallReceive",
 
   // earned
   EarnedAce = "earned.ace",
