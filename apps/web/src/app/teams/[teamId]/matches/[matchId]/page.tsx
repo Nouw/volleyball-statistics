@@ -12,6 +12,7 @@ import { OnCourtPlayersCard } from "../../../../../components/matches/on-court-p
 import type { RouterOutputs } from "@repo/trpc";
 import { useTRPCClient } from "../../../../../utils/trpc";
 import { StatsCard } from "../../../../../components/matches/stats/stats-card";
+import { PlayersCourt } from "../../../../../components/matches/players-court";
 
 
 const VALID_TABS = ["total", "set1", "set2", "set3", "set4", "set5"] as const;
@@ -60,6 +61,7 @@ export default function MatchDetailPage(): JSX.Element {
         <StatsCard teamId={teamId} matchId={matchId} setIds={setIds} />
       ) : activeSet ? (
         <div className="space-y-4">
+          <PlayersCourt teamAId="" teamBId=""/>
           <RotationField
             teamId={teamId}
             matchId={matchId}
